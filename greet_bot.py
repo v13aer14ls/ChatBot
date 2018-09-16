@@ -1,7 +1,4 @@
-import requests
-import datetime
-
-greet_bot = BotHandler(620155979:AAHMyrpOIi7z22PcDUu9uKIxA9vuepGR4hc)
+greet_bot = BotHandler('620155979:AAHMyrpOIi7z22PcDUu9uKIxA9vuepGR4hc')  
 greetings = ('hello', 'hi', 'greetings', 'sup')
 now = datetime.datetime.now()
 

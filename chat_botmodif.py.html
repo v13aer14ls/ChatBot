@@ -1,0 +1,80 @@
+<html><head>
+<title>chat_botmodif.py</title>
+<meta name="Generator" content="htmlizer/[Twisted, version 17.9.0]" />
+<link rel="alternate" href="chat_botmodif.py" type="text/x-python" />
+
+</head>
+<body>
+<pre><span class="py-src-keyword">import</span> <span class="py-src-variable">requests</span>
+<span class="py-src-keyword">import</span> <span class="py-src-variable">datetime</span>
+
+<span class="py-src-keyword">class</span> <span class="py-src-identifier">BotHandler</span>:
+
+    <span class="py-src-keyword">def</span> <span class="py-src-identifier">__init__</span>(<span class="py-src-parameter">self</span>, <span class="py-src-parameter">token</span>):
+        <span class="py-src-variable">self</span>.<span class="py-src-variable">token</span> = <span class="py-src-variable">token</span>
+        <span class="py-src-variable">self</span>.<span class="py-src-variable">api_url</span> = <span class="py-src-string">"https://api.telegram.org/bot{}/"</span>.<span class="py-src-variable">format</span>(<span class="py-src-string">'620155979:AAHMyrpOIi7z22PcDUu9uKIxA9vuepGR4hc'</span>)
+
+    <span class="py-src-keyword">def</span> <span class="py-src-identifier">get_updates</span>(<span class="py-src-parameter">self</span>, <span class="py-src-parameter">offset</span>=<span class="py-src-parameter">None</span>, <span class="py-src-parameter">timeout</span>=<span class="py-src-number">30</span>):
+        <span class="py-src-variable">method</span> = <span class="py-src-string">'getUpdates'</span>
+        <span class="py-src-variable">params</span> = {<span class="py-src-string">'timeout'</span>: <span class="py-src-variable">timeout</span>, <span class="py-src-string">'offset'</span>: <span class="py-src-variable">offset</span>}
+        <span class="py-src-variable">resp</span> = <span class="py-src-variable">requests</span>.<span class="py-src-variable">get</span>(<span class="py-src-variable">self</span>.<span class="py-src-variable">api_url</span> + <span class="py-src-variable">method</span>, <span class="py-src-variable">params</span>)
+        <span class="py-src-variable">result_json</span> = <span class="py-src-variable">resp</span>.<span class="py-src-variable">json</span>()[<span class="py-src-string">'result'</span>]
+        <span class="py-src-keyword">return</span> <span class="py-src-variable">result_json</span>
+
+    <span class="py-src-keyword">def</span> <span class="py-src-identifier">send_message</span>(<span class="py-src-parameter">self</span>, <span class="py-src-parameter">chat_id</span>, <span class="py-src-parameter">text</span>):
+        <span class="py-src-variable">params</span> = {<span class="py-src-string">'chat_id'</span>: <span class="py-src-variable">chat_id</span>, <span class="py-src-string">'text'</span>: <span class="py-src-variable">text</span>}
+        <span class="py-src-variable">method</span> = <span class="py-src-string">'sendMessage'</span>
+        <span class="py-src-variable">resp</span> = <span class="py-src-variable">requests</span>.<span class="py-src-variable">post</span>(<span class="py-src-variable">self</span>.<span class="py-src-variable">api_url</span> + <span class="py-src-variable">method</span>, <span class="py-src-variable">params</span>)
+        <span class="py-src-keyword">return</span> <span class="py-src-variable">resp</span>
+
+    <span class="py-src-keyword">def</span> <span class="py-src-identifier">get_last_update</span>(<span class="py-src-parameter">self</span>):
+        <span class="py-src-variable">get_result</span> = <span class="py-src-variable">self</span>.<span class="py-src-variable">get_updates</span>()
+
+        <span class="py-src-keyword">if</span> <span class="py-src-variable">len</span>(<span class="py-src-variable">get_result</span>) &gt; <span class="py-src-number">0</span>:
+            <span class="py-src-variable">last_update</span> = <span class="py-src-variable">get_result</span>[-<span class="py-src-number">1</span>]
+        <span class="py-src-keyword">else</span>:
+            <span class="py-src-variable">last_update</span> = <span class="py-src-variable">get_result</span>[<span class="py-src-variable">len</span>(<span class="py-src-variable">get_result</span>)]
+
+        <span class="py-src-keyword">return</span> <span class="py-src-variable">last_update</span>
+
+<span class="py-src-variable">greet_bot</span> = <span class="py-src-variable">BotHandler</span>(<span class="py-src-variable">token</span>)
+<span class="py-src-variable">greetings</span> = (<span class="py-src-string">'hello'</span>, <span class="py-src-string">'hi'</span>, <span class="py-src-string">'greetings'</span>, <span class="py-src-string">'sup'</span>)
+<span class="py-src-variable">now</span> = <span class="py-src-variable">datetime</span>.<span class="py-src-variable">datetime</span>.<span class="py-src-variable">now</span>()
+
+
+<span class="py-src-keyword">def</span> <span class="py-src-identifier">main</span>():
+    <span class="py-src-variable">new_offset</span> = <span class="py-src-variable">None</span>
+    <span class="py-src-variable">today</span> = <span class="py-src-variable">now</span>.<span class="py-src-variable">day</span>
+    <span class="py-src-variable">hour</span> = <span class="py-src-variable">now</span>.<span class="py-src-variable">hour</span>
+
+    <span class="py-src-keyword">while</span> <span class="py-src-variable">True</span>:
+        <span class="py-src-variable">greet_bot</span>.<span class="py-src-variable">get_updates</span>(<span class="py-src-variable">new_offset</span>)
+
+        <span class="py-src-variable">last_update</span> = <span class="py-src-variable">greet_bot</span>.<span class="py-src-variable">get_last_update</span>()
+
+        <span class="py-src-variable">last_update_id</span> = <span class="py-src-variable">last_update</span>[<span class="py-src-string">'update_id'</span>]
+        <span class="py-src-variable">last_chat_text</span> = <span class="py-src-variable">last_update</span>[<span class="py-src-string">'message'</span>][<span class="py-src-string">'text'</span>]
+        <span class="py-src-variable">last_chat_id</span> = <span class="py-src-variable">last_update</span>[<span class="py-src-string">'message'</span>][<span class="py-src-string">'chat'</span>][<span class="py-src-string">'id'</span>]
+        <span class="py-src-variable">last_chat_name</span> = <span class="py-src-variable">last_update</span>[<span class="py-src-string">'message'</span>][<span class="py-src-string">'chat'</span>][<span class="py-src-string">'first_name'</span>]
+
+        <span class="py-src-keyword">if</span> <span class="py-src-variable">last_chat_text</span>.<span class="py-src-variable">lower</span>() <span class="py-src-keyword">in</span> <span class="py-src-variable">greetings</span> <span class="py-src-keyword">and</span> <span class="py-src-variable">today</span> == <span class="py-src-variable">now</span>.<span class="py-src-variable">day</span> <span class="py-src-keyword">and</span> <span class="py-src-number">6</span> &lt;= <span class="py-src-variable">hour</span> &lt; <span class="py-src-number">12</span>:
+            <span class="py-src-variable">greet_bot</span>.<span class="py-src-variable">send_message</span>(<span class="py-src-variable">last_chat_id</span>, <span class="py-src-string">'Good Morning  {}'</span>.<span class="py-src-variable">format</span>(<span class="py-src-variable">last_chat_name</span>))
+            <span class="py-src-variable">today</span> += <span class="py-src-number">1</span>
+
+        <span class="py-src-keyword">elif</span> <span class="py-src-variable">last_chat_text</span>.<span class="py-src-variable">lower</span>() <span class="py-src-keyword">in</span> <span class="py-src-variable">greetings</span> <span class="py-src-keyword">and</span> <span class="py-src-variable">today</span> == <span class="py-src-variable">now</span>.<span class="py-src-variable">day</span> <span class="py-src-keyword">and</span> <span class="py-src-number">12</span> &lt;= <span class="py-src-variable">hour</span> &lt; <span class="py-src-number">17</span>:
+            <span class="py-src-variable">greet_bot</span>.<span class="py-src-variable">send_message</span>(<span class="py-src-variable">last_chat_id</span>, <span class="py-src-string">'Good Afternoon {}'</span>.<span class="py-src-variable">format</span>(<span class="py-src-variable">last_chat_name</span>))
+            <span class="py-src-variable">today</span> += <span class="py-src-number">1</span>
+
+        <span class="py-src-keyword">elif</span> <span class="py-src-variable">last_chat_text</span>.<span class="py-src-variable">lower</span>() <span class="py-src-keyword">in</span> <span class="py-src-variable">greetings</span> <span class="py-src-keyword">and</span> <span class="py-src-variable">today</span> == <span class="py-src-variable">now</span>.<span class="py-src-variable">day</span> <span class="py-src-keyword">and</span> <span class="py-src-number">17</span> &lt;= <span class="py-src-variable">hour</span> &lt; <span class="py-src-number">23</span>:
+            <span class="py-src-variable">greet_bot</span>.<span class="py-src-variable">send_message</span>(<span class="py-src-variable">last_chat_id</span>, <span class="py-src-string">'Good Evening  {}'</span>.<span class="py-src-variable">format</span>(<span class="py-src-variable">last_chat_name</span>))
+            <span class="py-src-variable">today</span> += <span class="py-src-number">1</span>
+
+        <span class="py-src-variable">new_offset</span> = <span class="py-src-variable">last_update_id</span> + <span class="py-src-number">1</span>
+
+<span class="py-src-keyword">if</span> <span class="py-src-variable">__name__</span> == <span class="py-src-string">'__main__'</span>:
+    <span class="py-src-keyword">try</span>:
+        <span class="py-src-variable">main</span>()
+    <span class="py-src-keyword">except</span> <span class="py-src-variable">KeyboardInterrupt</span>:
+        <span class="py-src-variable">exit</span>()
+</pre>
+</body>
